@@ -1,4 +1,4 @@
-### ASGM (Async Star Graph Metric 
+### ASGM (Async Star Graph Metric) 
 
 #### Installation 
 
