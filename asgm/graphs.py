@@ -116,7 +116,7 @@ class AsyncNonBinaryStarGraph(AsyncBaseStarGraph):
     def score(self, max_score: float | None = None) -> float:
         """
         Return the score by summing ``AsyncNonBinaryNode`` score values.
-        :param max_score: If provided returns nomalized score, by dividing ``score / max_score``.
+        :param max_score: If provided returns normalized score, by dividing ``score / max_score``.
         """
 
         score = sum(self._eval_scores)
