@@ -25,27 +25,39 @@ class OpenAIModel(BaseChatModel):
 
     def __init__(
             self,
-            client: OpenAI,
+            client: OpenAI | AsyncOpenAI,
             model: ChatModel
     ):
         self.client = client
         self.model = model
+
+    # ==== Completions ====
 
     def create_completion(
             self,
             input: list[Message],
             **kwargs
     ) -> str:
-        """
-        :param input: List of objects of the OpenAI package type ``Message``.
-        :param kwargs: Keyword arguments such as ``temperature``, ``top-p``, etc.
-        :return:
-        """
         return self.client.responses.create(
             input=input,
             model=self.model,
             **kwargs
         ).output[0].content[0].text
+
+    async def acreate_completion(
+            self,
+            input: list[Message],
+            **kwargs
+    ) -> str:
+        res = await self.client.responses.create(
+            input=input,
+            model=self.model,
+            **kwargs
+        )
+
+        return res.output[0].content[0].text
+
+    # ==== Tool Completions ====
 
     def create_tool_completion(
             self,
@@ -76,6 +88,37 @@ class OpenAIModel(BaseChatModel):
 
         return tool_calls
 
+    async def acreate_tool_completion(
+            self,
+            input: list[Message],
+            tools: list[Tool],
+            **kwargs
+    ) -> list[Any]:
+        res = await self.client.responses.create(
+            input=input,
+            tools=[tool['schema'] for tool in tools],
+            model=self.model,
+            **kwargs
+        )
+
+        tool_calls = []
+        for output in res.output:
+
+            # if output is a function call
+            if isinstance(output, ResponseFunctionToolCall):
+                kwargs = json.loads(output.arguments)
+
+                # find relevant tool name and call a tool
+                for tool in tools:
+                    if tool['name'] == output.name:
+                        tool_calls.append(
+                            tool['func'](**kwargs)
+                        )
+
+        return tool_calls
+
+    # ==== Structured Completions ====
+
     def create_structured_completion(
             self,
             input: list[Message],
@@ -89,16 +132,17 @@ class OpenAIModel(BaseChatModel):
             **kwargs
         ).output_parsed
 
-
-class AsyncOpenAIModel(BaseChatModel):
-    """
-    An asynchronous wrapper around the async OpenAI client that implements ``BaseModel``.
-    """
-
-    def __init__(
+    async def acreate_structured_completion(
             self,
-            client: AsyncOpenAI,
-            model: ChatModel
-    ):
-        self.client = client
-        self.model = model
+            input: list[Message],
+            text_format: BaseModel,
+            **kwargs
+    ) -> Any:
+        res = await self.client.responses.parse(
+            input=input,
+            model=self.model,
+            text_format=text_format,
+            **kwargs
+        )
+
+        return res.output_parsed
