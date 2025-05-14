@@ -16,10 +16,17 @@ class BaseModel(ABC):
         pass
 
     @abstractmethod
+    def create_tool_completion(self, *args, **kwargs) -> Any:
+        pass
+
+    @abstractmethod
+    async def acreate_tool_completion(self, *args, **kwargs) -> Any:
+        pass
+
+    @abstractmethod
     def create_structured_completion(self, *args, **kwargs) -> Any:
         pass
 
     @abstractmethod
     async def acreate_structured_completion(self, *args, **kwargs) -> Any:
         pass
-
