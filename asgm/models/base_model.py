@@ -1,32 +1,25 @@
-from abc import ABC, abstractmethod
 from typing import Any
 
 
-class BaseModel(ABC):
+class BaseChatModel:
     """
     An interface to implement calls to LLMs.
     """
 
-    @abstractmethod
     def create_completion(self, *args, **kwargs) -> Any:
-        pass
+        raise NotImplementedError
 
-    @abstractmethod
     async def acreate_completion(self, *args, **kwargs) -> Any:
-        pass
+        raise NotImplementedError
 
-    @abstractmethod
     def create_tool_completion(self, *args, **kwargs) -> Any:
-        pass
+        raise NotImplementedError
 
-    @abstractmethod
     async def acreate_tool_completion(self, *args, **kwargs) -> Any:
-        pass
+        raise NotImplementedError
 
-    @abstractmethod
     def create_structured_completion(self, *args, **kwargs) -> Any:
-        pass
+        raise NotImplementedError
 
-    @abstractmethod
     async def acreate_structured_completion(self, *args, **kwargs) -> Any:
-        pass
+        raise NotImplementedError
