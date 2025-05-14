@@ -5,6 +5,7 @@ from openai import OpenAI, AsyncOpenAI
 from pydantic import BaseModel
 from openai.types.responses.response_input_param import Message
 from openai.types.responses.response_output_item import ResponseFunctionToolCall
+from openai.types.shared.chat_model import ChatModel
 
 from .base_model import BaseChatModel
 
@@ -25,7 +26,7 @@ class OpenAIModel(BaseChatModel):
     def __init__(
             self,
             client: OpenAI,
-            model: str
+            model: ChatModel
     ):
         self.client = client
         self.model = model
@@ -97,7 +98,7 @@ class AsyncOpenAIModel(BaseChatModel):
     def __init__(
             self,
             client: AsyncOpenAI,
-            model: str
+            model: ChatModel
     ):
         self.client = client
         self.model = model
