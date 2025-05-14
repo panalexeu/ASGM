@@ -55,7 +55,7 @@ class OpenAIModel(BaseChatModel):
     ) -> list[Any]:
         res = self.client.responses.create(
             input=input,
-            tools=[tool.schema for tool in tools],
+            tools=[tool['schema'] for tool in tools],
             model=self.model,
             **kwargs
         )
@@ -69,9 +69,9 @@ class OpenAIModel(BaseChatModel):
 
                 # find relevant tool name and call a tool
                 for tool in tools:
-                    if tool.name == output.name:
+                    if tool['name'] == output.name:
                         tool_calls.append(
-                            tool.func(**kwargs)
+                            tool['func'](**kwargs)
                         )
 
         return tool_calls
