@@ -1,27 +1,56 @@
+from abc import ABC, abstractmethod
 from typing import Any
+
+from pydantic import BaseModel
 
 from .types import Message, Tool
 
 
-class BaseChatModel:
+class BaseChatModel(ABC):
     """
     An interface to implement calls to LLMs.
     """
 
-    def create_completion(self, *args, **kwargs) -> Any:
-        raise NotImplementedError
+    @abstractmethod
+    def create_completion(self, input: list[Message], **kwargs) -> str:
+        pass
 
-    async def acreate_completion(self, *args, **kwargs) -> Any:
-        raise NotImplementedError
+    @abstractmethod
+    async def acreate_completion(self, input: list[Message], **kwargs) -> str:
+        pass
 
-    def create_tool_completion(self, *args, **kwargs) -> Any:
-        raise NotImplementedError
+    @abstractmethod
+    def create_tool_completion(
+            self,
+            input: list[Message],
+            tool: list[Tool],
+            **kwargs
+    ) -> list[Any]:
+        pass
 
-    async def acreate_tool_completion(self, *args, **kwargs) -> Any:
-        raise NotImplementedError
+    @abstractmethod
+    async def acreate_tool_completion(
+            self,
+            input: list[Message],
+            tool: list[Tool],
+            **kwargs
+    ) -> list[Any]:
+        pass
 
-    def create_structured_completion(self, *args, **kwargs) -> Any:
-        raise NotImplementedError
+    @abstractmethod
+    def create_structured_completion(
+            self,
+            input: list[Message],
+            text_format: BaseModel,
+            **kwargs
+    ) -> dict:
+        pass
 
-    async def acreate_structured_completion(self, *args, **kwargs) -> Any:
-        raise NotImplementedError
+    @abstractmethod
+    async def acreate_structured_completion(
+            self,
+            input: list[Message],
+            text_format: BaseModel,
+            **kwargs
+    ) -> dict:
+        pass
