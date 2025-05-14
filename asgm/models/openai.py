@@ -3,17 +3,11 @@ from typing import Any, Callable, TypedDict
 
 from openai import OpenAI, AsyncOpenAI
 from pydantic import BaseModel
-from openai.types.responses.response_input_param import Message
 from openai.types.responses.response_output_item import ResponseFunctionToolCall
 from openai.types.shared.chat_model import ChatModel
 
 from .base_model import BaseChatModel
-
-
-class Tool(TypedDict):
-    name: str
-    schema: dict
-    func: Callable
+from .types import Tool, Message
 
 
 class OpenAIModel(BaseChatModel):
@@ -124,20 +118,20 @@ class OpenAIModel(BaseChatModel):
             input: list[Message],
             text_format: BaseModel,
             **kwargs
-    ) -> Any:
+    ) -> dict:
         return self.client.responses.parse(
             input=input,
             model=self.model,
             text_format=text_format,
             **kwargs
-        ).output_parsed
+        ).output_parsed.model_dump()
 
     async def acreate_structured_completion(
             self,
             input: list[Message],
             text_format: BaseModel,
             **kwargs
-    ) -> Any:
+    ) -> dict:
         res = await self.client.responses.parse(
             input=input,
             model=self.model,
@@ -145,4 +139,4 @@ class OpenAIModel(BaseChatModel):
             **kwargs
         )
 
-        return res.output_parsed
+        return res.output_parsed.model_dump()
