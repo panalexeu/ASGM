@@ -12,18 +12,26 @@ class BaseChatModel(ABC):
     """
 
     @abstractmethod
-    def create_completion(self, input: list[Message], **kwargs) -> str:
+    def create_completion(
+            self,
+            input: list[Message],
+            **kwargs
+    ) -> str:
         pass
 
     @abstractmethod
-    async def acreate_completion(self, input: list[Message], **kwargs) -> str:
+    async def acreate_completion(
+            self,
+            input: list[Message],
+            **kwargs
+    ) -> str:
         pass
 
     @abstractmethod
     def create_tool_completion(
             self,
             input: list[Message],
-            tool: list[Tool],
+            tools: list[Tool],
             **kwargs
     ) -> list[Any]:
         pass
@@ -32,7 +40,7 @@ class BaseChatModel(ABC):
     async def acreate_tool_completion(
             self,
             input: list[Message],
-            tool: list[Tool],
+            tools: list[Tool],
             **kwargs
     ) -> list[Any]:
         pass
