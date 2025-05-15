@@ -1,8 +1,7 @@
-import json
-from typing import Callable
-
-from openai import AsyncOpenAI
 from pydantic import BaseModel
+
+from .models.base_model import BaseChatModel
+from .models.types import Message, Tool
 
 
 class BaseABSNode:
@@ -13,7 +12,7 @@ class BaseABSNode:
     class OutputFormat(BaseModel):
         pass
 
-    async def eval(self, content: str, client: AsyncOpenAI, model: str) -> OutputFormat:
+    async def eval(self, content: str, model: BaseChatModel) -> OutputFormat:
         raise NotImplementedError
 
 
@@ -35,19 +34,18 @@ Additionally, provide reasoning behind your answer in the `reason` field."""
     def __init__(self, criteria: str):
         self.criteria = criteria
 
-    async def eval(self, content: str, client: AsyncOpenAI, model: str) -> OutputFormat:
-        res = await client.responses.parse(
+    async def eval(self, content: str, model: BaseChatModel) -> OutputFormat:
+        res = await model.acreate_structured_completion(
             input=[
-                {'role': 'system', 'content': self.sys_prompt},
-                {'role': 'developer', 'content': f'Evaluation criteria: {self.criteria}'},
-                {'role': 'user', 'content': content}
+                Message(role='system', content=self.sys_prompt),
+                Message(role='developer', content=f'Evaluation critieria: {self.criteria}'),
+                Message(role='user', content=content)
             ],
-            model=model,
             text_format=self.OutputFormat,
             temperature=0
         )
 
-        return res.output_parsed
+        return res
 
 
 class AsyncNonBinaryNode(BaseABSNode):
@@ -73,25 +71,26 @@ Additionally, provide reasoning behind your answer in the `reason` field."""
         self.criteria = criteria
         self.verdicts = verdicts
 
-    async def eval(self, content: str, client: AsyncOpenAI, model: str) -> OutputFormat:
-        res = await client.responses.parse(
+    async def eval(self, content: str, model: BaseChatModel) -> OutputFormat:
+        res = await model.acreate_structured_completion(
             input=[
-                {'role': 'system', 'content': self.sys_prompt},
-                {'role': 'developer', 'content': f'Evaluation criteria: {self.criteria}'},
-                {'role': 'developer', 'content': f'Possible verdicts: {self.verdicts}'},
-                {'role': 'user', 'content': content}
+                Message(role='system', content=self.sys_prompt),
+                Message(role='developer', content=f'Evaluation criteria: {self.criteria}'),
+                Message(role='developer', content=f'Possible verdicts: {self.verdicts}'),
+                Message(role='user', content=content)
             ],
-            model=model,
             text_format=self.OutputFormat,
             temperature=0
         )
 
-        return res.output_parsed
+        return res
 
 
 class AsyncNonBinaryToolCallNode(BaseABSNode):
     """
     Defines criteria when the output is not binary and numeric score is retrieved by function calling.
+
+    A possible criterion could be a description for the model specifying the cases in which the tool should be called.
     """
     sys_prompt = """You are a helpful judging assistant.
 Evaluate whether the provided content passes the criteria determined by function calling."""
@@ -99,34 +98,23 @@ Evaluate whether the provided content passes the criteria determined by function
     def __init__(
             self,
             criteria,
-            tool: Callable,
-            tool_schema: dict
+            tools: list[Tool]
     ):
         self.criteria = criteria
-        self.tool = tool
-        self.tool_schema = tool_schema
+        self.tools = tools
 
-    @staticmethod
-    def _unpack_tool_call(tool_call) -> dict:
-        res = json.loads(tool_call.output[0].arguments)
-        return res
-
-    async def eval(self, content: str, client: AsyncOpenAI, model: str) -> AsyncNonBinaryNode.OutputFormat:
-        res = await client.responses.create(
+    async def eval(self, content: str, model: BaseChatModel) -> AsyncNonBinaryNode.OutputFormat:
+        res = await model.acreate_tool_completion(
             input=[
-                {'role': 'system', 'content': self.sys_prompt},
-                {'role': 'developer', 'content': self.criteria},
-                {'role': 'user', 'content': content}
+                Message(role='system', content=self.sys_prompt),
+                Message(role='developer', content=self.criteria),
+                Message(role='user', content=content),
             ],
-            tools=[self.tool_schema],
-            model=model,
+            tools=self.tools,
             temperature=0
         )
 
-        kwargs = self._unpack_tool_call(res)
-        score = self.tool(**kwargs)
-
         return AsyncNonBinaryNode.OutputFormat(
-            score=score,
+            score=res[0],  # for now, retrieve the first entry in tool calls results
             reason='Tool call'
         )

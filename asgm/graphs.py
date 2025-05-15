@@ -1,8 +1,6 @@
-"""ASGM (Async Star Graph Metric) directly depends on openai package."""
 import asyncio
 
-from openai import AsyncOpenAI
-
+from .models.base_model import BaseChatModel
 from .nodes import (
     AsyncBinaryNode,
     AsyncNonBinaryNode,
@@ -14,13 +12,11 @@ class AsyncBaseStarGraph:
     def __init__(
             self,
             children: list[BaseABSNode],
-            client: AsyncOpenAI,
-            model: str
+            model: BaseChatModel
     ):
         self.children = children
-        self.client = client
-        self.evaluation: list[BaseABSNode.OutputFormat] | None = None
         self.model = model
+        self.evaluation: list[BaseABSNode.OutputFormat] | None = None
 
     # implement evaluation
     async def eval(self, root_content: str) -> list[BaseABSNode.OutputFormat]:
@@ -29,7 +25,6 @@ class AsyncBaseStarGraph:
             *[
                 child.eval(
                     content=root_content,
-                    client=self.client,
                     model=self.model
                 )
                 for child in self.children
@@ -57,10 +52,9 @@ class AsyncBinaryStarGraph(AsyncBaseStarGraph):
     def __init__(
             self,
             children: list[AsyncBinaryNode],
-            client: AsyncOpenAI,
-            model: str
+            model: BaseChatModel
     ):
-        super().__init__(children=children, client=client, model=model)
+        super().__init__(children=children, model=model)
 
     async def eval(self, root_content: str) -> list[AsyncBinaryNode.OutputFormat]:
         return await super().eval(root_content)
@@ -98,10 +92,9 @@ class AsyncNonBinaryStarGraph(AsyncBaseStarGraph):
             self,
             root_content: str,
             children: list[AsyncNonBinaryNode],
-            client: AsyncOpenAI,
-            model: str
+            model: BaseChatModel
     ):
-        super().__init__(children=children, client=client, model=model)
+        super().__init__(children=children, model=model)
 
     async def eval(self, root_content: str) -> list[AsyncNonBinaryNode.OutputFormat]:
         return await super().eval(root_content)
