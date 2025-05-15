@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, Type
 
 from pydantic import BaseModel
 
@@ -49,7 +49,7 @@ class BaseChatModel(ABC):
     def create_structured_completion(
             self,
             input: list[Message],
-            text_format: BaseModel,
+            text_format: Type[BaseModel],
             **kwargs
     ) -> BaseModel:
         pass
@@ -58,7 +58,7 @@ class BaseChatModel(ABC):
     async def acreate_structured_completion(
             self,
             input: list[Message],
-            text_format: BaseModel,
+            text_format: Type[BaseModel],
             **kwargs
     ) -> BaseModel:
         pass

@@ -1,5 +1,5 @@
 import json
-from typing import Any, Callable, TypedDict
+from typing import Any, Type
 
 from openai import OpenAI, AsyncOpenAI
 from pydantic import BaseModel
@@ -116,7 +116,7 @@ class OpenAIModel(BaseChatModel):
     def create_structured_completion(
             self,
             input: list[Message],
-            text_format: BaseModel,
+            text_format: Type[BaseModel],
             **kwargs
     ) -> BaseModel:
         return self.client.responses.parse(
@@ -129,7 +129,7 @@ class OpenAIModel(BaseChatModel):
     async def acreate_structured_completion(
             self,
             input: list[Message],
-            text_format: BaseModel,
+            text_format: Type[BaseModel],
             **kwargs
     ) -> BaseModel:
         res = await self.client.responses.parse(
