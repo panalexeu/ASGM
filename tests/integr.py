@@ -100,7 +100,7 @@ def test_openai_model_returns_structured_completion(model, input):
     )
     print(res)
 
-    assert isinstance(res, dict)
+    assert isinstance(res, Response)
 
 
 def test_openai_model_returns_tool_completion(model, input, tools):
@@ -134,7 +134,7 @@ async def test_async_openai_model_returns_structured_completion(async_model, inp
     )
     print(res)
 
-    assert isinstance(res, dict)
+    assert isinstance(res, Response)
 
 
 async def test_async_openai_model_returns_tool_completion(async_model, input, tools):

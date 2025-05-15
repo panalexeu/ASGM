@@ -51,7 +51,7 @@ class BaseChatModel(ABC):
             input: list[Message],
             text_format: BaseModel,
             **kwargs
-    ) -> dict:
+    ) -> BaseModel:
         pass
 
     @abstractmethod
@@ -60,5 +60,5 @@ class BaseChatModel(ABC):
             input: list[Message],
             text_format: BaseModel,
             **kwargs
-    ) -> dict:
+    ) -> BaseModel:
         pass

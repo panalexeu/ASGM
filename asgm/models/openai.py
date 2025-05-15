@@ -118,20 +118,20 @@ class OpenAIModel(BaseChatModel):
             input: list[Message],
             text_format: BaseModel,
             **kwargs
-    ) -> dict:
+    ) -> BaseModel:
         return self.client.responses.parse(
             input=input,
             model=self.model,
             text_format=text_format,
             **kwargs
-        ).output_parsed.model_dump()
+        ).output_parsed
 
     async def acreate_structured_completion(
             self,
             input: list[Message],
             text_format: BaseModel,
             **kwargs
-    ) -> dict:
+    ) -> BaseModel:
         res = await self.client.responses.parse(
             input=input,
             model=self.model,
@@ -139,4 +139,4 @@ class OpenAIModel(BaseChatModel):
             **kwargs
         )
 
-        return res.output_parsed.model_dump()
+        return res.output_parsed
