@@ -18,11 +18,11 @@ class BaseABSNode:
 
 class AsyncBinaryNode(BaseABSNode):
     """
-    Defines criteria when output is binary (pass/no pass).
+    Defines criterion when output is binary (pass/no pass).
     """
 
     sys_prompt = """You are a helpful judging assistant.
-Evaluate whether the provided content passes the criteria.
+Evaluate whether the provided content passes the criterion.
 Your output is boolean and should be provided in the `pass_` field.
 Use True if it passes, False if it does not.
 Additionally, provide reasoning behind your answer in the `reason` field."""
@@ -31,14 +31,14 @@ Additionally, provide reasoning behind your answer in the `reason` field."""
         pass_: bool
         reason: str
 
-    def __init__(self, criteria: str):
-        self.criteria = criteria
+    def __init__(self, criterion: str):
+        self.criterion = criterion
 
     async def eval(self, content: str, model: BaseChatModel) -> OutputFormat:
         res = await model.acreate_structured_completion(
             input=[
                 Message(role='system', content=self.sys_prompt),
-                Message(role='developer', content=f'Evaluation critieria: {self.criteria}'),
+                Message(role='developer', content=f'Evaluation critieria: {self.criterion}'),
                 Message(role='user', content=content)
             ],
             text_format=self.OutputFormat,
@@ -50,12 +50,12 @@ Additionally, provide reasoning behind your answer in the `reason` field."""
 
 class AsyncNonBinaryNode(BaseABSNode):
     """
-    Defines criteria when the output is not binary but numeric (some form of scoring).
-    Unlike ``AsyncBinaryNode`` in scoring, criteria and verdicts are used.
-    Verdicts define what the score should be depending on the criteria results.
+    Defines criterion when the output is not binary but numeric (some form of scoring).
+    Unlike ``AsyncBinaryNode`` in scoring, criterion and verdicts are used.
+    Verdicts define what the score should be depending on the criterion results.
     """
     sys_prompt = """You are a helpful judging assistant.
-Evaluate which verdict the provided criteria results in.
+Evaluate which verdict the provided criterion results in.
 Your output is numeric and should be provided in the `score field`.
 Additionally, provide reasoning behind your answer in the `reason` field."""
 
@@ -65,17 +65,17 @@ Additionally, provide reasoning behind your answer in the `reason` field."""
 
     def __init__(
             self,
-            criteria: str,
+            criterion: str,
             verdicts: list[str]
     ):
-        self.criteria = criteria
+        self.criterion = criterion
         self.verdicts = verdicts
 
     async def eval(self, content: str, model: BaseChatModel) -> OutputFormat:
         res = await model.acreate_structured_completion(
             input=[
                 Message(role='system', content=self.sys_prompt),
-                Message(role='developer', content=f'Evaluation criteria: {self.criteria}'),
+                Message(role='developer', content=f'Evaluation criterion: {self.criterion}'),
                 Message(role='developer', content=f'Possible verdicts: {self.verdicts}'),
                 Message(role='user', content=content)
             ],
@@ -88,26 +88,26 @@ Additionally, provide reasoning behind your answer in the `reason` field."""
 
 class AsyncNonBinaryToolCallNode(BaseABSNode):
     """
-    Defines criteria when the output is not binary and numeric score is retrieved by function calling.
+    Defines criterion when the output is not binary and numeric score is retrieved by function calling.
 
     A possible criterion could be a description for the model specifying the cases in which the tool should be called.
     """
     sys_prompt = """You are a helpful judging assistant.
-Evaluate whether the provided content passes the criteria determined by function calling."""
+Evaluate whether the provided content passes the criterion determined by function calling."""
 
     def __init__(
             self,
-            criteria,
+            criterion,
             tools: list[Tool]
     ):
-        self.criteria = criteria
+        self.criterion = criterion
         self.tools = tools
 
     async def eval(self, content: str, model: BaseChatModel) -> AsyncNonBinaryNode.OutputFormat:
         res = await model.acreate_tool_completion(
             input=[
                 Message(role='system', content=self.sys_prompt),
-                Message(role='developer', content=self.criteria),
+                Message(role='developer', content=self.criterion),
                 Message(role='user', content=content),
             ],
             tools=self.tools,
