@@ -13,24 +13,22 @@ from .nodes import (
 class AsyncBaseStarGraph:
     def __init__(
             self,
-            root_content: str,
             children: list[BaseABSNode],
             client: AsyncOpenAI,
             model: str
     ):
-        self.root_content = root_content
         self.children = children
         self.client = client
         self.evaluation: list[BaseABSNode.OutputFormat] | None = None
         self.model = model
 
     # implement evaluation
-    async def eval(self) -> list[BaseABSNode.OutputFormat]:
+    async def eval(self, root_content: str) -> list[BaseABSNode.OutputFormat]:
         """Returns evaluation result over children."""
         self.evaluation = await asyncio.gather(
             *[
                 child.eval(
-                    content=self.root_content,
+                    content=root_content,
                     client=self.client,
                     model=self.model
                 )
@@ -58,15 +56,14 @@ class AsyncBinaryStarGraph(AsyncBaseStarGraph):
 
     def __init__(
             self,
-            root_content: str,
             children: list[AsyncBinaryNode],
             client: AsyncOpenAI,
             model: str
     ):
-        super().__init__(root_content=root_content, children=children, client=client, model=model)
+        super().__init__(children=children, client=client, model=model)
 
-    async def eval(self) -> list[AsyncBinaryNode.OutputFormat]:
-        return await super().eval()
+    async def eval(self, root_content: str) -> list[AsyncBinaryNode.OutputFormat]:
+        return await super().eval(root_content)
 
     @property
     def _evaluation_bool(self) -> list[bool]:
@@ -104,10 +101,10 @@ class AsyncNonBinaryStarGraph(AsyncBaseStarGraph):
             client: AsyncOpenAI,
             model: str
     ):
-        super().__init__(root_content=root_content, children=children, client=client, model=model)
+        super().__init__(children=children, client=client, model=model)
 
-    async def eval(self) -> list[AsyncNonBinaryNode.OutputFormat]:
-        return await super().eval()
+    async def eval(self, root_content: str) -> list[AsyncNonBinaryNode.OutputFormat]:
+        return await super().eval(root_content)
 
     @property
     def _eval_scores(self) -> list[float]:
