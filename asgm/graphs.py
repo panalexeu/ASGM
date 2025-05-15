@@ -90,7 +90,6 @@ class AsyncBinaryStarGraph(AsyncBaseStarGraph):
 class AsyncNonBinaryStarGraph(AsyncBaseStarGraph):
     def __init__(
             self,
-            root_content: str,
             children: list[AsyncNonBinaryNode],
             model: BaseChatModel
     ):

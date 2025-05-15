@@ -8,6 +8,7 @@ from asgm.graphs import (
     AsyncNonBinaryStarGraph
 )
 from asgm.models.fake import FakeChatModel
+from asgm.models.types import Tool
 
 
 async def test_async_binary_graph():
@@ -33,3 +34,30 @@ async def test_async_binary_graph():
     ]
     assert binary_graph.binary_score() is False
     assert binary_graph.score() == 0
+
+
+async def test_async_non_binary_graph():
+    fake_model = FakeChatModel(
+        # resembles Output format of AsyncNonBinaryNode
+        score=0,
+        reason='fake'
+    )
+    children = [
+        AsyncNonBinaryNode(criterion='fake criterion', verdicts=['fake verdict', 'fake verdict']),
+        AsyncNonBinaryToolCallNode(
+            criterion='fake criterion',
+            tools=[Tool(name='fake', schema=dict(), func=lambda score, reason: 0)]
+        )
+    ]
+    graph = AsyncNonBinaryStarGraph(
+        children=children,
+        model=fake_model
+    )
+
+    res = await graph.eval('fake content')
+
+    assert res == [
+        AsyncNonBinaryNode.OutputFormat(score=0, reason='fake'),
+        AsyncNonBinaryNode.OutputFormat(score=0, reason='Tool call'),
+    ]
+    assert graph.score() == 0
