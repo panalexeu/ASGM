@@ -7,6 +7,9 @@ from .types import Message, Tool
 
 
 class FakeChatModel(BaseChatModel):
+    def __init__(self, **kwargs):
+        self.kwargs = kwargs
+
     def create_completion(self, input: list[Message], **kwargs) -> str:
         return 'fake response'
 
@@ -14,13 +17,13 @@ class FakeChatModel(BaseChatModel):
         return 'fake response'
 
     def create_tool_completion(self, input: list[Message], tools: list[Tool], **kwargs) -> list[Any]:
-        return [tool['func'](**kwargs) for tool in tools]
+        return [tool['func'](**self.kwargs) for tool in tools]
 
     async def acreate_tool_completion(self, input: list[Message], tools: list[Tool], **kwargs) -> list[Any]:
-        return [tool['func'](**kwargs) for tool in tools]
+        return [tool['func'](**self.kwargs) for tool in tools]
 
     def create_structured_completion(self, input: list[Message], text_format: Type[BaseModel], **kwargs) -> BaseModel:
-        return text_format(**kwargs)
+        return text_format(**self.kwargs)
 
     async def acreate_structured_completion(
             self,
@@ -28,6 +31,6 @@ class FakeChatModel(BaseChatModel):
             text_format: Type[BaseModel],
             **kwargs
     ) -> BaseModel:
-        return text_format(**kwargs)
+        return text_format(**self.kwargs)
 
 
