@@ -61,3 +61,37 @@ async def test_async_non_binary_graph():
         AsyncNonBinaryNode.OutputFormat(score=0, reason='Tool call'),
     ]
     assert graph.score() == 0
+
+
+async def test_async_non_binary_weighted_graph():
+    fake_model = FakeChatModel(
+        # resembles Output format of AsyncNonBinaryNode
+        score=1,
+        reason='fake'
+    )
+    # both nodes will output 1. the weighted result for one is 1 * 2 = 2, and for the other, 1 * 3 = 3. The sum is 5.
+    children = [
+        AsyncNonBinaryNode(
+            criterion='fake criterion',
+            verdicts=['fake verdict', 'fake verdict'],
+            weight=2
+        ),
+        AsyncNonBinaryToolCallNode(
+            criterion='fake criterion',
+            tools=[Tool(name='fake', schema=dict(), func=lambda score, reason: 1)],
+            weight=3
+        )
+    ]
+
+    graph = AsyncNonBinaryStarGraph(
+        children=children,
+        model=fake_model
+    )
+
+    res = await graph.eval('fake content')
+
+    assert res == [
+        AsyncNonBinaryNode.OutputFormat(score=2, reason='fake'),
+        AsyncNonBinaryNode.OutputFormat(score=3, reason='Tool call'),
+    ]
+    assert graph.score() == 5
