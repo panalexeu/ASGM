@@ -66,10 +66,12 @@ Additionally, provide reasoning behind your answer in the `reason` field."""
     def __init__(
             self,
             criterion: str,
-            verdicts: list[str]
+            verdicts: list[str],
+            weight: float = 1
     ):
         self.criterion = criterion
         self.verdicts = verdicts
+        self.weight = weight
 
     async def eval(self, content: str, model: BaseChatModel) -> OutputFormat:
         res = await model.acreate_structured_completion(
@@ -82,6 +84,9 @@ Additionally, provide reasoning behind your answer in the `reason` field."""
             text_format=self.OutputFormat,
             temperature=0
         )
+
+        # apply weight to the score
+        res.score *= self.weight
 
         return res
 
@@ -98,10 +103,12 @@ Evaluate whether the provided content passes the criterion determined by functio
     def __init__(
             self,
             criterion,
-            tools: list[Tool]
+            tools: list[Tool],
+            weight: float = 1
     ):
         self.criterion = criterion
         self.tools = tools
+        self.weight = weight
 
     async def eval(self, content: str, model: BaseChatModel) -> AsyncNonBinaryNode.OutputFormat:
         res = await model.acreate_tool_completion(
@@ -115,6 +122,6 @@ Evaluate whether the provided content passes the criterion determined by functio
         )
 
         return AsyncNonBinaryNode.OutputFormat(
-            score=res[0],  # for now, retrieve the first entry in tool calls results
+            score=res[0] * self.weight,  # for now, retrieve the first entry in tool calls results
             reason='Tool call'
         )
