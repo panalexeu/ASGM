@@ -82,7 +82,6 @@ async def test_async_non_binary_weighted_graph():
             weight=3
         )
     ]
-
     graph = AsyncNonBinaryStarGraph(
         children=children,
         model=fake_model
