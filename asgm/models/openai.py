@@ -20,10 +20,12 @@ class OpenAIModel(BaseChatModel):
     def __init__(
             self,
             client: OpenAI | AsyncOpenAI,
-            model: ChatModel
+            model: ChatModel,
+            timeout: float = 180
     ):
         self.client = client
         self.model = model
+        self.timeout = timeout
 
     # ==== Completions ====
 
@@ -35,6 +37,7 @@ class OpenAIModel(BaseChatModel):
         return self.client.responses.create(
             input=input,
             model=self.model,
+            timeout=self.timeout,
             **kwargs
         ).output[0].content[0].text
 
@@ -46,6 +49,7 @@ class OpenAIModel(BaseChatModel):
         res = await self.client.responses.create(
             input=input,
             model=self.model,
+            timeout=self.timeout,
             **kwargs
         )
 
@@ -63,6 +67,7 @@ class OpenAIModel(BaseChatModel):
             input=input,
             tools=[tool['schema'] for tool in tools],
             model=self.model,
+            timeout=self.timeout,
             **kwargs
         )
 
@@ -92,6 +97,7 @@ class OpenAIModel(BaseChatModel):
             input=input,
             tools=[tool['schema'] for tool in tools],
             model=self.model,
+            timeout=self.timeout,
             **kwargs
         )
 
@@ -123,6 +129,7 @@ class OpenAIModel(BaseChatModel):
             input=input,
             model=self.model,
             text_format=text_format,
+            timeout=self.timeout,
             **kwargs
         ).output_parsed
 
@@ -136,6 +143,7 @@ class OpenAIModel(BaseChatModel):
             input=input,
             model=self.model,
             text_format=text_format,
+            timeout=self.timeout,
             **kwargs
         )
 
