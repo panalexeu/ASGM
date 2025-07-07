@@ -22,7 +22,12 @@ class FakeChatModel(BaseChatModel):
     async def acreate_tool_completion(self, input: list[Message], tools: list[Tool], **kwargs) -> list[Any]:
         return [tool['func'](**self.kwargs) for tool in tools]
 
-    def create_structured_completion(self, input: list[Message], text_format: Type[BaseModel], **kwargs) -> BaseModel:
+    def create_structured_completion(
+            self,
+            input: list[Message],
+            text_format: Type[BaseModel],
+            **kwargs
+    ) -> BaseModel | None:
         return text_format(**self.kwargs)
 
     async def acreate_structured_completion(
@@ -30,7 +35,7 @@ class FakeChatModel(BaseChatModel):
             input: list[Message],
             text_format: Type[BaseModel],
             **kwargs
-    ) -> BaseModel:
+    ) -> BaseModel | None:
         return text_format(**self.kwargs)
 
 

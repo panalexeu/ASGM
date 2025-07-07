@@ -45,6 +45,12 @@ Additionally, provide reasoning behind your answer in the `reason` field."""
             temperature=0
         )
 
+        if not res:
+            return self.OutputFormat(
+                pass_=False,
+                reason='Unable to parse model response.'
+            )
+
         return res
 
 
@@ -85,9 +91,14 @@ Additionally, provide reasoning behind your answer in the `reason` field."""
             temperature=0
         )
 
+        if not res:
+            return self.OutputFormat(
+                score=0,
+                reason='Unable to parse model response.'
+            )
+
         # apply weight to the score
         res.score *= self.weight
-
         return res
 
 
@@ -120,6 +131,12 @@ Evaluate whether the provided content passes the criterion determined by functio
             tools=self.tools,
             temperature=0
         )
+
+        if not res:
+            return AsyncNonBinaryNode.OutputFormat(
+                score=0,
+                reason='Unable to parse model response.'
+            )
 
         return AsyncNonBinaryNode.OutputFormat(
             score=res[0] * self.weight,  # for now, retrieve the first entry in tool calls results
