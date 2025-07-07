@@ -124,27 +124,33 @@ class OpenAIModel(BaseChatModel):
             input: list[Message],
             text_format: Type[BaseModel],
             **kwargs
-    ) -> BaseModel:
-        return self.client.responses.parse(
-            input=input,
-            model=self.model,
-            text_format=text_format,
-            timeout=self.timeout,
-            **kwargs
-        ).output_parsed
+    ) -> BaseModel | None:
+        try:
+            return self.client.responses.parse(
+                input=input,
+                model=self.model,
+                text_format=text_format,
+                timeout=self.timeout,
+                **kwargs
+            ).output_parsed
+        except:
+            return
 
     async def acreate_structured_completion(
             self,
             input: list[Message],
             text_format: Type[BaseModel],
             **kwargs
-    ) -> BaseModel:
-        res = await self.client.responses.parse(
-            input=input,
-            model=self.model,
-            text_format=text_format,
-            timeout=self.timeout,
-            **kwargs
-        )
+    ) -> BaseModel | None:
+        try:
+            res = await self.client.responses.parse(
+                input=input,
+                model=self.model,
+                text_format=text_format,
+                timeout=self.timeout,
+                **kwargs
+            )
 
-        return res.output_parsed
+            return res.output_parsed
+        except:
+            return
