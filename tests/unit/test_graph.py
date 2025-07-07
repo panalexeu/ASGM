@@ -94,3 +94,53 @@ async def test_async_non_binary_weighted_graph():
         AsyncNonBinaryNode.OutputFormat(score=3, reason='Tool call'),
     ]
     assert graph.score() == 5
+
+
+async def test_async_binary_graph_handles_parsing_errors_gracefully():
+    fake_model = FakeChatModel(parsing_error=True)
+    children = [
+        AsyncBinaryNode(
+            criterion='fake criterion'
+        ),
+        AsyncBinaryNode(
+            criterion='fake criterion'
+        ),
+    ]
+    graph = AsyncBinaryStarGraph(
+        children=children,
+        model=fake_model
+    )
+
+    res = await graph.eval('fake content')
+
+    assert res == [
+        AsyncBinaryNode.OutputFormat(pass_=False, reason='Unable to parse model response.'),
+        AsyncBinaryNode.OutputFormat(pass_=False, reason='Unable to parse model response.')
+    ]
+
+
+async def test_async_non_binary_graph_handles_parsing_errors_gracefully():
+    fake_model = FakeChatModel(parsing_error=True)
+    children = [
+        AsyncNonBinaryNode(
+            criterion='fake criterion',
+            verdicts=['fake verdict', 'fake verdict'],
+            weight=2
+        ),
+        AsyncNonBinaryNode(
+            criterion='fake criterion',
+            verdicts=['fake verdict', 'fake verdict'],
+            weight=3
+        )
+    ]
+    graph = AsyncNonBinaryStarGraph(
+        children=children,
+        model=fake_model
+    )
+
+    res = await graph.eval('fake content')
+
+    assert res == [
+        AsyncNonBinaryNode.OutputFormat(score=0, reason='Unable to parse model response.'),
+        AsyncNonBinaryNode.OutputFormat(score=0, reason='Unable to parse model response.')
+    ]

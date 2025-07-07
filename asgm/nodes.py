@@ -132,12 +132,6 @@ Evaluate whether the provided content passes the criterion determined by functio
             temperature=0
         )
 
-        if not res:
-            return AsyncNonBinaryNode.OutputFormat(
-                score=0,
-                reason='Unable to parse model response.'
-            )
-
         return AsyncNonBinaryNode.OutputFormat(
             score=res[0] * self.weight,  # for now, retrieve the first entry in tool calls results
             reason='Tool call'

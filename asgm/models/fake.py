@@ -28,6 +28,9 @@ class FakeChatModel(BaseChatModel):
             text_format: Type[BaseModel],
             **kwargs
     ) -> BaseModel | None:
+        if self.kwargs.get('parsing_error'):
+            return None
+
         return text_format(**self.kwargs)
 
     async def acreate_structured_completion(
@@ -36,6 +39,9 @@ class FakeChatModel(BaseChatModel):
             text_format: Type[BaseModel],
             **kwargs
     ) -> BaseModel | None:
+        if self.kwargs.get('parsing_error'):
+            return None
+
         return text_format(**self.kwargs)
 
 
